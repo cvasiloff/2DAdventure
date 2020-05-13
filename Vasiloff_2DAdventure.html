@@ -1,0 +1,244 @@
+<!--
+Name: Cameron Vasiloff
+Assignment: 2D Adventure
+Description: Use Context 2D to create a game that has a player kill enemies
+Due Date: January 19, 2020
+
+Files Included: Vasiloff_2DAdventure.html, Vasiloff_2DAdventure_Interact.js
+Images Included: img/player.png, img/monster1.png, img/monster2.png, img/monster3.png
+-->
+<html>
+<head>
+	<title>2D Adventure!</title>
+	<script src="Vasiloff_2DAdventure_Interact.js"></script>
+	
+	<script>
+		class Main
+		{
+			constructor()
+			{
+				//Sets number of squares for length and width
+				this.col = 15;
+				this.row = 11;
+				
+				//Initialize board
+				this.makeMaze();
+				this.paintBoard();
+				this.drawGrid();
+				
+				//Location to write if user wins or loses
+				this.writeMe = document.getElementById("gameState");
+				
+				//Creates Plater with stats
+				//X, Y, Max HP, Current HP, Attack, Defense, Image, Type
+				this.p = new Player(1, 1, 100, 100, 20, 10, "player", 1);
+				this.m1 = new Monster(1, 9, 100, 100, 18, 5, "monster1", 30);
+				this.m2 = new Monster(13, 5, 100, 100, 19, 10, "monster2", 31);
+				this.m3 = new Monster(12, 1, 100, 100, 20, 10, "monster3", 32);
+				
+				
+				
+			}
+			
+			//Updates Monster Info
+			updateAll()
+			{
+			
+				this.m1.update();
+				this.m2.update();
+				this.m3.update();
+				
+			}
+			
+			//Redraws the canvas
+			renderAll()
+			{
+				this.paintBoard();
+				this.drawGrid();
+				this.p.renderPlayer();
+				this.m1.renderPlayer();
+				this.m2.renderPlayer();
+				this.m3.renderPlayer();
+			}
+			
+			//Initializes the 2D array that holds the board information
+			makeMaze()
+			{	
+				//Sets up 2D array
+				this.mazeArray = new Array(this.col);
+					
+				for(var i = 0; i < this.mazeArray.length; i++)
+				{
+					this.mazeArray[i] = new Array(this.row);
+				}
+				
+				//Populates the board
+				//10 = Bricks, 11 = Tree, 22 = Potion
+				//30 = Monster1, 31 = Monster2, 32 = Monster3
+				//1 = Player, 0 = Free Space
+				this.mazeArray = [
+				[10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+				[10,  1,  0,  0, 10,  0,  0,  0,  0,  30, 10],
+				[10,  0,  0,  0, 10,  0,  0,  0, 22,  0, 10],
+				[10,  0,  0,  0, 10,  0, 11,  0,  0,  0, 10],
+				[10,  0, 11,  0,  0,  0,  0,  0,  0,  0, 10],
+				[10,  0,  0,  0,  0,  0,  0,  0,  0,  0, 10],
+				[10,  0,  0,  0,  0,  0,  0,  0,  0,  0, 10],
+				[10, 10, 10, 10,  0,  0,  0, 11,  0,  0, 10],
+				[10,  0,  0,  0,  0,  0,  0,  0,  0,  0, 10],
+				[10,  0,  0,  0,  0,  0,  0,  0,  0,  0, 10],
+				[10,  0,  0,  0,  0,  0,  0,  0,  0,  0, 10],
+				[10,  0,  0,  0, 11,  0,  0, 11,  0,  0, 10],
+				[10, 32,  0,  0, 11,  0,  0, 11,  0,  0, 10],
+				[10, 22,  0,  0, 11,  31,  0, 11,  0,  0, 10],
+				[10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+				];
+			}
+			
+			//Draws the board based on locations of 2D array
+			drawGrid()
+			{
+				ctx.lineWidth = 2;
+				ctx.strokeStyle = "#F00";
+				ctx.lineCap = "butt";
+				ctx.strokeStyle = "black";
+
+				for(var i = 0; i < this.col; i++)
+				{
+					for(var j = 0; j < this.row; j++)
+					{
+						//Drawing the wall
+						if(this.mazeArray[i][j] == 10)
+						{
+							
+							ctx.fillStyle = "red";
+							ctx.fillRect(i*64,j*64,64,16);
+							ctx.strokeRect(i*64,j*64,64,16);
+							
+							ctx.fillStyle = "#B22222";
+							ctx.fillRect(i*64,j*64 + 16,64,16);
+							ctx.strokeRect(i*64,j*64 + 16,64,16);
+							
+							ctx.fillStyle = "red";
+							ctx.fillRect(i*64,j*64 + 32,64,16);
+							ctx.strokeRect(i*64,j*64 + 32,64,16);
+							
+							ctx.fillStyle = "#B22222";
+							ctx.fillRect(i*64,j*64 + 48,64,16);
+							ctx.strokeRect(i*64,j*64 + 48,64,16);
+						}
+						
+						//Drawing Trees
+						else if(this.mazeArray[i][j] == 11)
+						{
+							ctx.fillStyle = "lightgreen";
+							ctx.fillRect(i*64,j*64,64,64);
+							ctx.strokeRect(i*64,j*64,64,64);
+							
+							ctx.fillStyle = "#ad844e";
+							ctx.fillRect(i*64 + 24,j*64 + 24,16,40);
+							
+							ctx.fillStyle = "black";
+							ctx.beginPath();
+							ctx.arc(i*64 + 32,j*64 + 48,3,0,2*Math.PI,false);
+							ctx.fill();
+							
+							ctx.fillStyle = "darkgreen";
+							ctx.beginPath();
+							ctx.arc(i*64 + 32,j*64 + 16,16,0,2*Math.PI,false);
+							ctx.fill();
+							
+							ctx.fillStyle = "green";
+							ctx.beginPath();
+							ctx.arc(i*64 + 18,j*64 + 30,16,0,2*Math.PI,false);
+							ctx.fill();
+							
+							ctx.fillStyle = "green";
+							ctx.beginPath();
+							ctx.arc(i*64 + 46,j*64 + 30,16,0,2*Math.PI,false);
+							ctx.fill();
+						}
+						
+						//Drawing Potions
+						else if(this.mazeArray[i][j] == 22)
+						{
+							ctx.fillStyle = "lightgreen";
+							ctx.fillRect(i*64,j*64,64,64);
+							ctx.strokeRect(i*64,j*64,64,64);
+							
+							ctx.lineWidth = 2;
+							ctx.strokeStyle = "#F00";
+							ctx.lineCap = "butt";
+							ctx.strokeStyle = "black";
+							
+							ctx.fillStyle = "black";
+							ctx.beginPath();
+							ctx.arc(i * 64 + 32, j * 64 + 36,14,0,2*Math.PI,false);
+							ctx.fill();
+							
+							ctx.fillStyle = "cyan";
+							ctx.fillRect(i *64+26, j*64 + 12,12,16);
+							ctx.strokeRect(i*64+26, j*64 + 12,12,16);
+							
+							ctx.fillRect(i*64+22, j*64 + 10,20,4);
+							ctx.strokeRect(i*64+22, j*64 + 10,20,4);
+
+							ctx.fillStyle = "cyan";
+							ctx.beginPath();
+							ctx.arc(i * 64 + 32, j * 64 + 36,12,0,2*Math.PI,false);
+							ctx.fill();
+						}
+						//Drawing the floor
+						else
+						{
+							ctx.fillStyle = "lightgreen";
+							ctx.fillRect(i*64,j*64,64,64);
+							ctx.strokeRect(i*64,j*64,64,64);
+						}
+							
+					}
+				}
+
+			}
+			
+			//Clears Board
+			paintBoard()
+			{
+				ctx.clearRect(0,0,960,704);
+			}	
+
+		}
+		
+		
+		
+		
+	</script>
+</head>
+<!--Refreshes body to show images-->
+<body onload="myMain.renderAll()">
+		
+		<section id="secImg" style="display:none;">
+			<IMG src="img/player.png" alt="player"  id="player"/>
+			<IMG src="img/monster1.png" alt="monster1"  id="monster1"/>
+			<IMG src="img/monster2.png" alt="monster2"  id="monster2"/>
+			<IMG src="img/monster3.png" alt="monster3"  id="monster3"/>
+		</section>
+		
+		<section id="Canvas" onkeydown="myMain.Movement()">
+			<canvas width=960 height=704 id="myCanvas" style="border: 1px solid black;">
+				Your Web-Browser does not support Canvase
+			</canvas>
+		</section>
+		
+		<!--Displays result of game-->
+		<section>
+			<h1 id ="gameState"></h1>
+		</section>
+		
+		<script>
+			var canvas = document.getElementById("myCanvas");
+			var ctx = canvas.getContext("2d");		
+			myMain = new Main();
+		</script>
+</body>
+</html>
